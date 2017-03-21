@@ -14,25 +14,22 @@
 
 import logging
 
-from flask import Flask
+from flask import Flask, jsonify
 import numpy as np
+from sklearn import datasets, svm
 
 app = Flask(__name__)
 
+# Load Dataset from scikit-learn.
+digits = datasets.load_digits()
 
-# [START numpy]
 @app.route('/')
 def calculate():
-    return_str = ''
-    x = np.array([[1, 2], [3, 4]])
-    y = np.array([[5, 6], [7, 8]])
+	clf = svm.SVC(gamma=0.001, C=100.)
+    clf.fit(digits.data[:-1], digits.target[:-1])
+    prediction = clf.predict(digits.data[-1:])
 
-    return_str += 'x: {} , y: {}<br />'.format(str(x), str(y))
-
-    # Multiply matrices
-    return_str += 'x dot y : {}'.format(str(np.dot(x, y)))
-    return return_str
-# [END numpy]
+    return jsonify({'prediction': repr(prediction)})
 
 
 @app.errorhandler(500)
